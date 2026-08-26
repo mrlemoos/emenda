@@ -17,6 +17,8 @@ const serif = Newsreader({
 export const metadata: Metadata = {
   title: { default: "Emenda", template: "%s | Emenda" },
   description: "Veja para onde foi o dinheiro das emendas parlamentares.",
+  applicationName: "Emenda",
+  appleWebApp: { title: "Emenda" },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
