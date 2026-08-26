@@ -170,6 +170,7 @@ export async function getAuthor(name: string) {
       year: amendments.year,
       purpose: amendments.purpose,
       paid: sql<number>`${amendments.paidAmount}::float`,
+      authorised: sql<number>`${amendments.authorisedAmount}::float`,
       recipient: recipients.name,
       recipientId: recipients.id,
       state: recipients.state,
@@ -181,7 +182,7 @@ export async function getAuthor(name: string) {
   return rows.length ? { name: decoded, amendments: rows } : null;
 }
 
-export async function getFloripaCoverage() {
+export async function getFiscalCoverages() {
   const db = getDb();
-  return db.select().from(fiscalCoverages).where(eq(fiscalCoverages.recipientKey, "floripa"));
+  return db.select().from(fiscalCoverages).orderBy(fiscalCoverages.recipientName, fiscalCoverages.source);
 }

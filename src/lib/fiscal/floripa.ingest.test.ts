@@ -17,6 +17,7 @@ function sampleDelivery(overrides: Partial<AuthorizedFiscalDelivery> = {}): Auth
     recipientScope: {
       recipientKey: "floripa",
       name: "Florianópolis",
+      state: "SC",
       authorizedTakerDocuments: [FLORIPA_CNPJ],
     },
     coverage: {
@@ -190,6 +191,7 @@ describe("ingestão fiscal de Florianópolis", () => {
     expect(coverage).toMatchObject({
       recipientKey: "floripa",
       recipientName: "Florianópolis",
+      state: "SC",
     });
     expect(coverage?.sources).toEqual(
       expect.arrayContaining([
@@ -236,6 +238,6 @@ describe("ingestão fiscal de Florianópolis", () => {
     const store = createMemoryFiscalStore();
     store.failNextPersist();
     await expect(ingestAuthorizedDelivery(sampleDelivery(), store)).rejects.toThrow("gravação do lote falhou");
-    expect(store.getCursor("adn_nfse")).toBeNull();
+    expect(store.getCursor("adn_nfse", "floripa")).toBeNull();
   });
 });

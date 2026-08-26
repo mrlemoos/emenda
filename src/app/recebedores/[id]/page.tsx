@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getRecipient } from "@/lib/data";
-import { formatDate, formatMoney } from "@/lib/format";
+import { formatDate, formatMoney, listSentAmount } from "@/lib/format";
 
 export default async function RecipientPage({ params }: PageProps<"/recebedores/[id]">) {
   const id = Number((await params).id);
@@ -33,17 +33,23 @@ export default async function RecipientPage({ params }: PageProps<"/recebedores/
         </section>
       ) : null}
       <ul className="result-list">
-        {data.amendments.map((row) => (
-          <li key={row.id}>
-            <Link href={`/emendas/${row.id}`}>
-              <strong>{row.purpose || `Emenda ${row.code}`}</strong>
-              <small>
-                {row.year} · {row.authorName}
-              </small>
-            </Link>
-            <strong>{formatMoney(row.paid)}</strong>
-          </li>
-        ))}
+        {data.amendments.map((row) => {
+          const amount = listSentAmount(row.paid, row.authorised);
+          return (
+            <li key={row.id}>
+              <Link href={`/emendas/${row.id}`}>
+                <strong>{row.purpose || `Emenda ${row.code}`}</strong>
+                <small>
+                  {row.year} · {row.authorName}
+                </small>
+              </Link>
+              <span className="amount">
+                <strong>{amount.primary}</strong>
+                {amount.secondary ? <small>{amount.secondary}</small> : null}
+              </span>
+            </li>
+          );
+        })}
       </ul>
     </main>
   );

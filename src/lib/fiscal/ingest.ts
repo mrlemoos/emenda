@@ -36,6 +36,8 @@ export async function ingestAuthorizedDelivery(
   await store.persistDelivery({
     recipientKey: delivery.recipientScope.recipientKey,
     recipientName: delivery.recipientScope.name,
+    state: delivery.recipientScope.state,
+    municipalityIbgeCode: delivery.recipientScope.municipalityIbgeCode,
     authorizedTakerDocuments: delivery.recipientScope.authorizedTakerDocuments,
     coverage: delivery.coverage,
     syncedAt,

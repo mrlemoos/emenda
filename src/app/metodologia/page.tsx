@@ -1,8 +1,9 @@
-import { getFloripaCoverage } from "@/lib/data";
+import { getFiscalCoverages } from "@/lib/data";
 import { formatDate } from "@/lib/format";
 
 export default async function MethodologyPage() {
-  const coverage = await getFloripaCoverage();
+  const coverage = await getFiscalCoverages();
+  const byRecipient = Map.groupBy(coverage, (row) => row.recipientKey);
   return (
     <main className="content-page">
       <header>
@@ -14,27 +15,33 @@ export default async function MethodologyPage() {
         <h2>De onde vêm os dados</h2>
         <p>
           Emendas, empenhos e pagamentos vêm das APIs públicas do Transferegov. Dados de gastos
-          começam por Florianópolis e entram apenas por entrega autorizada do recebedor ou feed
-          autorizado — nunca por enumeração pública de todas as notas.
+          começam por Florianópolis e São Paulo capital e entram apenas por entrega autorizada do
+          recebedor ou feed autorizado — nunca por enumeração pública de todas as notas.
         </p>
-        <h2>Cobertura de Florianópolis</h2>
+        <h2>Cobertura fiscal</h2>
         {coverage.length ? (
-          <ul>
-            {coverage.map((row) => (
-              <li key={`${row.recipientKey}-${row.source}`}>
-                <strong>{row.sourceLabel}</strong> · {formatDate(row.periodStart)} a{" "}
-                {formatDate(row.periodEnd)} · última sincronização {formatDate(row.lastSyncedAt)}
-                {row.knownGaps.length ? (
-                  <small> Lacunas: {row.knownGaps.join("; ")}</small>
-                ) : null}
-              </li>
-            ))}
-          </ul>
+          [...byRecipient.entries()].map(([recipientKey, rows]) => (
+            <section key={recipientKey}>
+              <h3>{rows[0].recipientName}</h3>
+              <ul>
+                {rows.map((row) => (
+                  <li key={`${row.recipientKey}-${row.source}`}>
+                    <strong>{row.sourceLabel}</strong> · {formatDate(row.periodStart)} a{" "}
+                    {formatDate(row.periodEnd)} · última sincronização {formatDate(row.lastSyncedAt)}
+                    {row.knownGaps.length ? (
+                      <small> Lacunas: {row.knownGaps.join("; ")}</small>
+                    ) : null}
+                  </li>
+                ))}
+              </ul>
+            </section>
+          ))
         ) : (
           <p>
-            Ainda sem sincronização fiscal publicada. NFS-e desde 1 de dezembro de 2025 deve usar o
-            Ambiente de Dados Nacional; o histórico anterior depende de exportação única do emissor
-            municipal antigo.
+            Ainda sem sincronização fiscal publicada. Florianópolis usa o Ambiente de Dados Nacional
+            desde 1 de dezembro de 2025 e exportação do emissor municipal antigo para o histórico.
+            São Paulo capital mantém a Nota Fiscal Paulistana e envia transcrição ao ADN; adesão
+            nacional não cobre o passado sozinha.
           </p>
         )}
         <h2>Confirmado ou provável</h2>

@@ -58,6 +58,19 @@ Plano mínimo para Floripa:
 3. Pedir à Prefeitura um feed autorizado das notas em que seus órgãos são tomadores ou destinatários. Para NFS-e novas, via ADN. Para o legado, uma exportação única do sistema antigo é mais simples que manter sua API indefinidamente.
 4. Publicar o vínculo entre emenda, transferência, empenho, liquidação, pagamento e nota. A nota isolada não prova que o recurso veio de uma emenda.
 
+## São Paulo capital
+
+São Paulo não replica o atalho de Florianópolis. A Prefeitura [mantém o emissor próprio](https://nfe.prefeitura.sp.gov.br/login.aspx) da Nota Fiscal Paulistana e, nas [orientações oficiais](https://notadomilhao.sf.prefeitura.sp.gov.br/categoria_perguntas_respostas/reforma-tributaria/), afirma que envia as informações ao Ambiente de Dados Nacional para a apuração dos novos tributos. Adesão ao ADN, aqui, é transcrição — não descontinuação do sistema municipal.
+
+Há um segundo recorte de cobertura. A Secretaria Municipal da Fazenda [tornou o Emissor Nacional obrigatório](https://prefeitura.sp.gov.br/web/fazenda/w/usoemissornacional) para profissionais liberais e autônomos a partir de 3 de agosto de 2026 e para o Simples Nacional a partir de 1º de novembro de 2026. Fora desses grupos, o caminho principal continua municipal. Portanto, uma única fonte (ADN ou Paulistana) não descreve o município inteiro.
+
+Plano mínimo para a capital paulista:
+
+1. Tratar `sp-capital` como recebedor fiscal próprio, com UF `SP` e CNPJ da Prefeitura (46.395.000/0001-39; IBGE 3550308).
+2. Pedir feed autorizado das notas em que órgãos do município são tomadores ou destinatários, preferindo a Paulistana para o volume local e o ADN como verificação ou complemento pós-transcrição.
+3. Declarar lacunas: histórico só no emissor municipal; ADN sem garantia retroativa; mudança de emissor só para parte dos contribuintes em 2026.
+4. Isolar cursor NSU por recebedor. Floripa e SP capital não podem partilhar o mesmo `adn_nfse`.
+
 ## Sigilo fiscal, LGPD e publicação
 
 Receber acesso técnico não autoriza publicar o XML inteiro. O [art. 198 do Código Tributário Nacional](https://www.planalto.gov.br/ccivil_03/leis/l5172compilado.htm) proíbe a Fazenda de divulgar informações obtidas em razão do ofício sobre a situação econômica ou financeira e os negócios do contribuinte. O intercâmbio de informação sigilosa entre órgãos também exige processo formal e preservação do sigilo.
@@ -73,6 +86,7 @@ Usar os portais nacionais como camada de verificação, não como mecanismo de d
 - NF-e: integração autorizada com o CNPJ do órgão comprador e consumo por NSU;
 - NFS-e de Floripa desde dezembro de 2025: acordo com a Prefeitura para distribuição pelo ADN;
 - NFS-e antiga de Floripa: exportação única do sistema municipal;
+- NFS-e de São Paulo capital: emissor próprio (Nota Fiscal Paulistana) continua; a Prefeitura transcreve e envia ao ADN. Acordo com o município cobre o feed municipal e, quando existir, a distribuição nacional. ADN sozinho não substitui o histórico paulistano;
 - demais municípios: priorizar os aderentes ao padrão nacional, mas ainda negociar autorização ou obter as chaves nos processos públicos.
 
 Isso evita manter centenas de conectores municipais no futuro. Não elimina o legado, nem transforma dados fiscais em dados abertos.

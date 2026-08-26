@@ -7,9 +7,14 @@ import type {
   StoredLink,
 } from "./types";
 
+export function fiscalCursorKey(recipientKey: string, source: string) {
+  return `${recipientKey}:${source}`;
+}
+
 type CoverageRow = {
   recipientKey: string;
   recipientName: string;
+  state: string;
   source: AuthorizedFiscalDelivery["coverage"]["source"];
   sourceLabel: string;
   periodStart: string;
@@ -33,8 +38,8 @@ export function createMemoryFiscalStore(): FiscalStore {
     failNextPersist() {
       failPersist = true;
     },
-    getCursor(source) {
-      return cursors.get(source) ?? null;
+    getCursor(source, recipientKey) {
+      return cursors.get(fiscalCursorKey(recipientKey, source)) ?? null;
     },
     async persistDelivery(input) {
       if (failPersist) {
@@ -54,6 +59,7 @@ export function createMemoryFiscalStore(): FiscalStore {
       coverages.set(coverageKey, {
         recipientKey: input.recipientKey,
         recipientName: input.recipientName,
+        state: input.state,
         source: input.coverage.source,
         sourceLabel: input.coverage.sourceLabel,
         periodStart: input.coverage.periodStart,
@@ -63,7 +69,7 @@ export function createMemoryFiscalStore(): FiscalStore {
       });
 
       if (input.cursor) {
-        cursors.set(input.cursor.source, input.cursor.lastNsu);
+        cursors.set(fiscalCursorKey(input.recipientKey, input.cursor.source), input.cursor.lastNsu);
       }
     },
     listGastos() {
@@ -78,6 +84,7 @@ export function createMemoryFiscalStore(): FiscalStore {
       return {
         recipientKey,
         recipientName: sources[0].recipientName,
+        state: sources[0].state,
         sources: sources.map((row) => ({
           source: row.source,
           sourceLabel: row.sourceLabel,

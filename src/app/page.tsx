@@ -24,7 +24,7 @@ export default async function Home() {
         <div><span>Dinheiro enviado</span><strong>{formatMoney(totals.paid, true)}</strong></div>
         <div><span>Emendas encontradas</span><strong>{totals.amendments.toLocaleString("pt-BR")}</strong></div>
         <div><span>Quem recebeu</span><strong>{totals.recipients.toLocaleString("pt-BR")}</strong></div>
-        <div className="stamp"><span>Cobertura</span><strong>Brasil inteiro</strong><small>Floripa em detalhe</small></div>
+        <div className="stamp"><span>Cobertura</span><strong>Brasil inteiro</strong><small>Floripa e SP capital em detalhe</small></div>
       </section>
 
       <section className="map-section ruled" id="mapa">

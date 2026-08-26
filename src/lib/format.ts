@@ -17,3 +17,13 @@ export function formatMoney(value: number, compact = false) {
 export function formatDate(value: Date | string) {
   return new Intl.DateTimeFormat("pt-BR", { dateStyle: "medium" }).format(new Date(value));
 }
+
+export function listSentAmount(paid: number, authorised: number) {
+  if (Number(paid) > 0) {
+    return { primary: formatMoney(Number(paid)), secondary: null };
+  }
+  if (Number(authorised) > 0) {
+    return { primary: "Sem dinheiro enviado", secondary: `Autorizado ${formatMoney(Number(authorised))}` };
+  }
+  return { primary: "Sem dinheiro enviado", secondary: null };
+}

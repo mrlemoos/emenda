@@ -24,7 +24,11 @@ export async function POST(request: Request) {
     return Response.json({ error: "JSON inválido" }, { status: 400 });
   }
 
-  if (!delivery?.recipientScope?.recipientKey || !Array.isArray(delivery.documents)) {
+  if (
+    !delivery?.recipientScope?.recipientKey ||
+    !delivery.recipientScope.state ||
+    !Array.isArray(delivery.documents)
+  ) {
     return Response.json({ error: "Entrega fiscal incompleta" }, { status: 400 });
   }
 

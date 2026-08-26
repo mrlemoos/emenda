@@ -17,7 +17,7 @@ export type {
   StoredLink,
 } from "./types";
 
-export { createMemoryFiscalStore } from "./memory-store";
+export { createMemoryFiscalStore, fiscalCursorKey } from "./memory-store";
 export { ingestAuthorizedDelivery } from "./ingest";
 export { getPublicCoverage, getPublicGastos, publicGastosCsv, type PublicGastoFilters } from "./public";
 export { normalizeDocument } from "./normalize";

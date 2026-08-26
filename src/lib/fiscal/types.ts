@@ -42,6 +42,8 @@ export type AuthorizedFiscalDelivery = {
   recipientScope: {
     recipientKey: string;
     name: string;
+    state: string;
+    municipalityIbgeCode?: string;
     authorizedTakerDocuments: string[];
   };
   coverage: {
@@ -113,6 +115,7 @@ export type PublicGasto = {
 export type PublicCoverage = {
   recipientKey: string;
   recipientName: string;
+  state: string;
   sources: Array<{
     source: CoverageSource;
     sourceLabel: string;
@@ -140,6 +143,8 @@ export type SeedAmendment = {
 export type PersistDeliveryInput = {
   recipientKey: string;
   recipientName: string;
+  state: string;
+  municipalityIbgeCode?: string;
   authorizedTakerDocuments?: string[];
   coverage: AuthorizedFiscalDelivery["coverage"];
   syncedAt: string;
@@ -151,7 +156,7 @@ export type PersistDeliveryInput = {
 export type FiscalStore = {
   seedAmendment(amendment: SeedAmendment): void;
   failNextPersist(): void;
-  getCursor(source: string): string | null;
+  getCursor(source: string, recipientKey: string): string | null;
   persistDelivery(input: PersistDeliveryInput): Promise<void>;
   listGastos(): NormalizedGasto[];
   listLinks(): StoredLink[];

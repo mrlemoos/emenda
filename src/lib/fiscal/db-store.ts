@@ -1,4 +1,4 @@
-import { eq, sql } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import { getDb } from "@/db";
 import {
   amendments,
@@ -10,7 +10,7 @@ import {
   syncRuns,
 } from "@/db/schema";
 import { ingestAuthorizedDelivery } from "./ingest";
-import { createMemoryFiscalStore } from "./memory-store";
+import { createMemoryFiscalStore, fiscalCursorKey } from "./memory-store";
 import type {
   AuthorizedFiscalDelivery,
   FiscalStore,
@@ -21,9 +21,13 @@ import type {
   StoredLink,
 } from "./types";
 
-export async function getSourceCursor(source: string): Promise<string | null> {
+export async function getSourceCursor(source: string, recipientKey: string): Promise<string | null> {
   const db = getDb();
-  const [row] = await db.select().from(sourceCursors).where(eq(sourceCursors.source, source)).limit(1);
+  const [row] = await db
+    .select()
+    .from(sourceCursors)
+    .where(eq(sourceCursors.source, fiscalCursorKey(recipientKey, source)))
+    .limit(1);
   return row?.lastNsu ?? null;
 }
 
@@ -31,9 +35,15 @@ export async function loadCoverageFromDb(recipientKey: string): Promise<PublicCo
   const db = getDb();
   const rows = await db.select().from(fiscalCoverages).where(eq(fiscalCoverages.recipientKey, recipientKey));
   if (!rows.length) return null;
+  const [recipient] = await db
+    .select({ state: recipients.state })
+    .from(recipients)
+    .where(eq(recipients.fiscalKey, recipientKey))
+    .limit(1);
   return {
     recipientKey,
     recipientName: rows[0].recipientName,
+    state: recipient?.state ?? "",
     sources: rows.map((row) => ({
       source: row.source,
       sourceLabel: row.sourceLabel,
@@ -163,6 +173,8 @@ async function persistDeliveryToDb(input: PersistDeliveryInput) {
     const recipientId = await ensureRecipient(
       input.recipientKey,
       input.recipientName,
+      input.state,
+      input.municipalityIbgeCode,
       input.authorizedTakerDocuments ?? [],
     );
 
@@ -269,7 +281,7 @@ async function persistDeliveryToDb(input: PersistDeliveryInput) {
       await db
         .insert(sourceCursors)
         .values({
-          source: input.cursor.source,
+          source: fiscalCursorKey(input.recipientKey, input.cursor.source),
           lastNsu: input.cursor.lastNsu,
           updatedAt: syncedAt,
         })
@@ -304,31 +316,38 @@ async function persistDeliveryToDb(input: PersistDeliveryInput) {
 async function ensureRecipient(
   recipientKey: string,
   recipientName: string,
+  state: string,
+  municipalityIbgeCode: string | undefined,
   authorizedTakerDocuments: string[] = [],
 ) {
   const db = getDb();
   const [byKey] = await db.select().from(recipients).where(eq(recipients.fiscalKey, recipientKey)).limit(1);
   if (byKey) return byKey.id;
 
+  const fiscalFields = {
+    fiscalKey: recipientKey,
+    state,
+    ...(municipalityIbgeCode ? { municipalityIbgeCode } : {}),
+    updatedAt: new Date(),
+  };
+
   for (const document of authorizedTakerDocuments) {
     const digits = document.replace(/\D/g, "");
     if (!digits) continue;
     const [byCnpj] = await db.select().from(recipients).where(eq(recipients.cnpj, digits)).limit(1);
     if (byCnpj) {
-      await db
-        .update(recipients)
-        .set({ fiscalKey: recipientKey, updatedAt: new Date() })
-        .where(eq(recipients.id, byCnpj.id));
+      await db.update(recipients).set(fiscalFields).where(eq(recipients.id, byCnpj.id));
       return byCnpj.id;
     }
   }
 
-  const [byName] = await db.select().from(recipients).where(eq(recipients.name, recipientName)).limit(1);
+  const [byName] = await db
+    .select()
+    .from(recipients)
+    .where(and(eq(recipients.name, recipientName), eq(recipients.state, state)))
+    .limit(1);
   if (byName) {
-    await db
-      .update(recipients)
-      .set({ fiscalKey: recipientKey, updatedAt: new Date() })
-      .where(eq(recipients.id, byName.id));
+    await db.update(recipients).set(fiscalFields).where(eq(recipients.id, byName.id));
     return byName.id;
   }
 
@@ -339,7 +358,8 @@ async function ensureRecipient(
       name: recipientName,
       cnpj: authorizedTakerDocuments[0]?.replace(/\D/g, "") || null,
       kind: "municipality",
-      state: "SC",
+      state,
+      municipalityIbgeCode: municipalityIbgeCode ?? null,
       municipalityName: recipientName,
       fiscalKey: recipientKey,
     })
