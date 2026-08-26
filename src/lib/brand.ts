@@ -1,3 +1,5 @@
+export const githubRepoUrl = "https://github.com/mrlemoos/emenda";
+
 export const brand = {
   paper: "#f3efe4",
   ink: "#181714",

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { IBM_Plex_Sans, Newsreader } from "next/font/google";
 import "./globals.css";
 import { SiteHeader } from "@/components/site-header";
+import { githubRepoUrl } from "@/lib/brand";
 
 const sans = IBM_Plex_Sans({
   variable: "--font-sans",
@@ -26,7 +27,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="pt-BR" className={`${sans.variable} ${serif.variable}`}>
       <body>
         <SiteHeader />{children}
-        <footer><span>Emenda é independente e usa dados públicos.</span><a href="https://github.com/" target="_blank">Encontrou um erro? Abra uma issue ↗</a></footer>
+        <footer><span>Emenda é independente e usa dados públicos.</span><a href={`${githubRepoUrl}/issues`} target="_blank">Encontrou um erro? Abra uma issue ↗</a></footer>
       </body>
     </html>
   );

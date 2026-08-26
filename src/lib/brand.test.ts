@@ -1,7 +1,13 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
-import { logoSvg } from "./brand";
+import { githubRepoUrl, logoSvg } from "./brand";
+
+describe("githubRepoUrl", () => {
+  it("points at the public mrlemoos/emenda repository", () => {
+    expect(githubRepoUrl).toBe("https://github.com/mrlemoos/emenda");
+  });
+});
 
 function siteRed(): string {
   const css = readFileSync(resolve("src/app/globals.css"), "utf8");

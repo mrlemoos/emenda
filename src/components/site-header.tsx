@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { githubRepoUrl } from "@/lib/brand";
 
 export function SiteHeader() {
   return (
@@ -7,7 +8,7 @@ export function SiteHeader() {
       <nav aria-label="Principal">
         <Link href="/#mapa">Mapa</Link><Link href="/#rankings">Rankings</Link><Link href="/metodologia">Como sabemos?</Link><Link href="/downloads">Baixar dados</Link>
       </nav>
-      <Link className="github-link" href="https://github.com/" target="_blank">Código aberto ↗</Link>
+      <Link className="github-link" href={githubRepoUrl} target="_blank">Código aberto ↗</Link>
     </header>
   );
 }
