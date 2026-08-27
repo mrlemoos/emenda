@@ -25,6 +25,7 @@ export { buildLinks } from "./link";
 export {
   getSourceCursor,
   ingestAuthorizedDeliveryToDb,
+  ingestMunicipalExpenseDeliveryToDb,
   loadCoverageFromDb,
   loadPublicGastosFromDb,
 } from "./db-store";

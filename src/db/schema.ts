@@ -19,8 +19,8 @@ export const recipientKind = pgEnum("recipient_kind", [
 ]);
 export const linkKind = pgEnum("link_kind", ["confirmed", "probable"]);
 export const syncStatus = pgEnum("sync_status", ["running", "complete", "failed"]);
-export const proofType = pgEnum("proof_type", ["nfe", "nfse_nacional", "nfse_municipal"]);
-export const proofStatus = pgEnum("proof_status", ["autorizada", "cancelada", "substituida"]);
+export const proofType = pgEnum("proof_type", ["nfe", "nfse_nacional", "nfse_municipal", "execucao_orcamentaria"]);
+export const proofStatus = pgEnum("proof_status", ["autorizada", "cancelada", "substituida", "registrado"]);
 export const coverageSource = pgEnum("coverage_source", [
   "adn_nfse",
   "exportacao_municipal",

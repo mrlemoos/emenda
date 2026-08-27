@@ -14,9 +14,9 @@ export default async function MethodologyPage() {
       <article className="prose">
         <h2>De onde vêm os dados</h2>
         <p>
-          Emendas, empenhos e pagamentos vêm das APIs públicas do Transferegov. Dados de gastos
-          começam por Florianópolis e São Paulo capital e entram apenas por entrega autorizada do
-          recebedor ou feed autorizado — nunca por enumeração pública de todas as notas.
+          Emendas, empenhos e pagamentos vêm das APIs públicas do Transferegov. Gastos de Florianópolis
+          e São Paulo capital dependem de entrega autorizada. Belo Horizonte e Recife também têm fontes
+          públicas de execução orçamentária, que não são notas fiscais.
         </p>
         <h2>Cobertura fiscal</h2>
         {coverage.length ? (
@@ -38,10 +38,10 @@ export default async function MethodologyPage() {
           ))
         ) : (
           <p>
-            Ainda sem sincronização fiscal publicada. Florianópolis usa o Ambiente de Dados Nacional
+            Ainda sem sincronização de gastos publicada. Florianópolis usa o Ambiente de Dados Nacional
             desde 1 de dezembro de 2025 e exportação do emissor municipal antigo para o histórico.
-            São Paulo capital mantém a Nota Fiscal Paulistana e envia transcrição ao ADN; adesão
-            nacional não cobre o passado sozinha.
+            São Paulo capital mantém a Nota Fiscal Paulistana. Belo Horizonte e Recife usam bases
+            públicas de execução orçamentária, sem declarar por si só a origem federal do recurso.
           </p>
         )}
         <h2>Confirmado ou provável</h2>

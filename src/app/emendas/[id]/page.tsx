@@ -7,6 +7,7 @@ const proofLabel = {
   nfe: "NF-e",
   nfse_nacional: "NFS-e nacional",
   nfse_municipal: "NFS-e municipal",
+  execucao_orcamentaria: "execução orçamentária",
 } as const;
 
 export default async function AmendmentPage({ params }: PageProps<"/emendas/[id]">) {

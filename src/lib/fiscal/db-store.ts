@@ -11,6 +11,8 @@ import {
 } from "@/db/schema";
 import { ingestAuthorizedDelivery } from "./ingest";
 import { createMemoryFiscalStore, fiscalCursorKey } from "./memory-store";
+import { prepareMunicipalExpenseDelivery } from "./municipal-expenses";
+import type { MunicipalExpenseDelivery } from "@/lib/city-expenses/types";
 import type {
   AuthorizedFiscalDelivery,
   FiscalStore,
@@ -20,6 +22,9 @@ import type {
   PublicGasto,
   StoredLink,
 } from "./types";
+
+const chunk = <T>(rows: T[], size = 1_000) =>
+  Array.from({ length: Math.ceil(rows.length / size) }, (_, index) => rows.slice(index * size, (index + 1) * size));
 
 export async function getSourceCursor(source: string, recipientKey: string): Promise<string | null> {
   const db = getDb();
@@ -105,17 +110,17 @@ export async function loadPublicGastosFromDb(filters: {
       sourceLabel: row.expense.proofSourceLabel ?? "",
       liquidationId: row.expense.liquidationId,
       paymentId: row.expense.paymentId,
-      fieldSources: {
-        supplierName: "nota" as const,
-        amount: "nota" as const,
-        description: "nota" as const,
-        spentAt: "nota" as const,
-      },
+      fieldSources: expenseFieldSources(row.expense.proofType),
       link:
         row.kind && row.amendmentCode
           ? { kind: row.kind, amendmentCode: row.amendmentCode, reasons: row.reasons ?? [] }
           : null,
     }));
+}
+
+function expenseFieldSources(proofType: typeof expenses.$inferSelect.proofType) {
+  const source = proofType === "execucao_orcamentaria" ? "execucao_orcamentaria" as const : "nota" as const;
+  return { supplierName: source, amount: source, description: source, spentAt: source };
 }
 
 export async function ingestAuthorizedDeliveryToDb(
@@ -139,6 +144,12 @@ export async function ingestAuthorizedDeliveryToDb(
     },
   };
   return ingestAuthorizedDelivery(delivery, store);
+}
+
+export async function ingestMunicipalExpenseDeliveryToDb(delivery: MunicipalExpenseDelivery) {
+  const input = prepareMunicipalExpenseDelivery(delivery);
+  await persistDeliveryToDb(input);
+  return { recipientKey: input.recipientKey, rowsProcessed: input.gastos.length };
 }
 
 async function loadLinksFromDb(): Promise<StoredLink[]> {
@@ -166,7 +177,7 @@ async function loadLinksFromDb(): Promise<StoredLink[]> {
 
 async function persistDeliveryToDb(input: PersistDeliveryInput) {
   const db = getDb();
-  const [run] = await db.insert(syncRuns).values({ source: `fiscal-${input.coverage.source}` }).returning();
+  const [run] = await db.insert(syncRuns).values({ source: input.syncSource ?? `fiscal-${input.coverage.source}` }).returning();
   const syncedAt = new Date(input.syncedAt);
 
   try {
@@ -178,10 +189,10 @@ async function persistDeliveryToDb(input: PersistDeliveryInput) {
       input.authorizedTakerDocuments ?? [],
     );
 
-    for (const gasto of input.gastos) {
+    for (const gastos of chunk(input.gastos)) {
       await db
         .insert(expenses)
-        .values({
+        .values(gastos.map((gasto) => ({
           sourceId: gasto.sourceId,
           recipientId,
           recipientKey: gasto.recipientKey,
@@ -198,12 +209,12 @@ async function persistDeliveryToDb(input: PersistDeliveryInput) {
           liquidationId: gasto.liquidationId,
           paymentId: gasto.paymentId,
           sourceUrl: gasto.sourceUrl ?? `https://emenda.local/fiscal/${gasto.sourceId}`,
-        })
+        })))
         .onConflictDoUpdate({
           target: expenses.sourceId,
           set: {
             recipientId,
-            recipientKey: gasto.recipientKey,
+            recipientKey: sql`excluded.recipient_key`,
             supplierName: sql`excluded.supplier_name`,
             supplierDocument: sql`excluded.supplier_document`,
             description: sql`excluded.description`,

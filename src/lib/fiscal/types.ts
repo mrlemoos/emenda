@@ -1,5 +1,5 @@
-export type ProofType = "nfe" | "nfse_nacional" | "nfse_municipal";
-export type ProofStatus = "autorizada" | "cancelada" | "substituida";
+export type ProofType = "nfe" | "nfse_nacional" | "nfse_municipal" | "execucao_orcamentaria";
+export type ProofStatus = "autorizada" | "cancelada" | "substituida" | "registrado";
 export type LinkKind = "confirmed" | "probable";
 export type CoverageSource =
   | "adn_nfse"
@@ -75,10 +75,10 @@ export type NormalizedGasto = {
   liquidationId: string | null;
   paymentId: string | null;
   fieldSources: {
-    supplierName: "nota";
-    amount: "nota";
-    description: "nota";
-    spentAt: "nota";
+    supplierName: "nota" | "execucao_orcamentaria";
+    amount: "nota" | "execucao_orcamentaria";
+    description: "nota" | "execucao_orcamentaria";
+    spentAt: "nota" | "execucao_orcamentaria";
   };
 };
 
@@ -141,6 +141,7 @@ export type SeedAmendment = {
 };
 
 export type PersistDeliveryInput = {
+  syncSource?: string;
   recipientKey: string;
   recipientName: string;
   state: string;
