@@ -9,8 +9,6 @@ export type MunicipalExpense = {
   paymentId: string | null;
   sourceUrl: string;
   sourceLabel: string;
-  /** Only a code the municipal source explicitly identifies as a federal parliamentary amendment. */
-  federalAmendmentCode: string | null;
 };
 
 export type MunicipalExpenseDelivery = {

@@ -65,7 +65,7 @@ export type NormalizedGasto = {
   supplierDocument: string | null;
   description: string | null;
   amount: string;
-  spentAt: string;
+  spentAt: string | null;
   proofType: ProofType;
   proofStatus: ProofStatus;
   proofAccessKey: string | null;

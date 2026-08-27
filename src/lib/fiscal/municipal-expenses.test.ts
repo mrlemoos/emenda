@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { prepareMunicipalExpenseDelivery } from "./municipal-expenses";
 
 describe("gastos municipais públicos", () => {
-  it("normaliza a execução, protege CPF e só confirma emenda federal declarada", () => {
+  it("normaliza a execução e protege CPF sem inventar vínculo com emenda", () => {
     const result = prepareMunicipalExpenseDelivery({
       recipient: { key: "belo-horizonte", name: "Belo Horizonte", state: "MG", municipalityIbgeCode: "3106200" },
       sourceLabel: "Dados Abertos PBH",
@@ -21,7 +21,6 @@ describe("gastos municipais públicos", () => {
           paymentId: "pag-1",
           sourceUrl: "https://dados.pbh.gov.br/despesa-1",
           sourceLabel: "Dados Abertos PBH",
-          federalAmendmentCode: "2026.12345",
         },
         {
           sourceId: "despesa-2",
@@ -34,7 +33,6 @@ describe("gastos municipais públicos", () => {
           paymentId: null,
           sourceUrl: "https://dados.pbh.gov.br/despesa-2",
           sourceLabel: "Dados Abertos PBH",
-          federalAmendmentCode: null,
         },
       ],
     });
@@ -51,12 +49,10 @@ describe("gastos municipais públicos", () => {
         expect.objectContaining({
           sourceId: "belo-horizonte:despesa-2",
           supplierDocument: null,
-          spentAt: "2026-01-31",
+          spentAt: null,
         }),
       ]),
     );
-    expect(result.links).toEqual([
-      expect.objectContaining({ gastoSourceId: "belo-horizonte:despesa-1", amendmentCode: "2026.12345", kind: "confirmed" }),
-    ]);
+    expect(result.links).toEqual([]);
   });
 });

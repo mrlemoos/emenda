@@ -20,7 +20,7 @@ export default async function RecipientPage({ params }: PageProps<"/recebedores/
       </header>
       {data.coverage.length ? (
         <section className="prose">
-          <h2>Cobertura fiscal</h2>
+          <h2>Cobertura de gastos</h2>
           <ul>
             {data.coverage.map((row) => (
               <li key={`${row.source}`}>

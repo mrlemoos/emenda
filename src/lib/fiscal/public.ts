@@ -19,8 +19,8 @@ export function getPublicGastos(store: FiscalStore, filters: PublicGastoFilters 
       if (filters.supplierName && !gasto.supplierName.toLowerCase().includes(filters.supplierName.toLowerCase())) {
         return false;
       }
-      if (filters.from && gasto.spentAt < filters.from) return false;
-      if (filters.to && gasto.spentAt > filters.to) return false;
+      if (filters.from && (!gasto.spentAt || gasto.spentAt < filters.from)) return false;
+      if (filters.to && (!gasto.spentAt || gasto.spentAt > filters.to)) return false;
       if (filters.amendmentCode) {
         const link = linkByGasto.get(gasto.sourceId);
         if (!link || link.amendmentCode !== filters.amendmentCode) return false;

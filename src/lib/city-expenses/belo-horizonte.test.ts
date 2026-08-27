@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { normaliseBeloHorizonteRows } from "./belo-horizonte";
 
 describe("despesas públicas de Belo Horizonte", () => {
-  it("normaliza credor, fases financeiras e só aceita emenda federal declarada", () => {
+  it("normaliza credor e fases financeiras sem criar vínculo com emenda", () => {
     const result = normaliseBeloHorizonteRows([
       {
         "Número Empenho": "2026NE0001",
@@ -13,7 +13,6 @@ describe("despesas públicas de Belo Horizonte", () => {
         "Histórico": "Material escolar",
         "Data Pagamento": "15/02/2026",
         "Valor Pago": "1.234,56",
-        "Número Emenda Federal": "2026.12345",
       },
       {
         "Número Empenho": "2026NE0002",
@@ -34,13 +33,11 @@ describe("despesas públicas de Belo Horizonte", () => {
         spentAt: "2026-02-15",
         liquidationId: "2026LI0001",
         paymentId: "2026OP0001",
-        federalAmendmentCode: "2026.12345",
       }),
       expect.objectContaining({
         supplierDocument: null,
         amount: "10.00",
         spentAt: "2026-03-02",
-        federalAmendmentCode: null,
       }),
     ]);
   });

@@ -1,7 +1,5 @@
 import type { MunicipalExpenseDelivery } from "@/lib/city-expenses/types";
-import type { PersistDeliveryInput, StoredLink } from "./types";
-
-const CONFIRMED_REASON = "Fonte municipal de despesa declara relação com a emenda federal";
+import type { PersistDeliveryInput } from "./types";
 
 export function prepareMunicipalExpenseDelivery(delivery: MunicipalExpenseDelivery): PersistDeliveryInput {
   const gastos = delivery.expenses.map((expense) => ({
@@ -11,7 +9,7 @@ export function prepareMunicipalExpenseDelivery(delivery: MunicipalExpenseDelive
     supplierDocument: publicSupplierDocument(expense.supplierDocument),
     description: expense.description,
     amount: expense.amount,
-    spentAt: expense.spentAt ?? delivery.periodEnd,
+    spentAt: expense.spentAt,
     proofType: "execucao_orcamentaria" as const,
     proofStatus: "registrado" as const,
     proofAccessKey: null,
@@ -28,18 +26,6 @@ export function prepareMunicipalExpenseDelivery(delivery: MunicipalExpenseDelive
     },
   }));
 
-  const links: StoredLink[] = delivery.expenses.flatMap((expense) =>
-    expense.federalAmendmentCode
-      ? [{
-          gastoSourceId: `${delivery.recipient.key}:${expense.sourceId}`,
-          amendmentCode: expense.federalAmendmentCode,
-          kind: "confirmed" as const,
-          reasons: [CONFIRMED_REASON],
-          previousReasons: null,
-        }]
-      : [],
-  );
-
   return {
     syncSource: `municipal-${delivery.recipient.key}-execucao-orcamentaria`,
     recipientKey: delivery.recipient.key,
@@ -55,7 +41,7 @@ export function prepareMunicipalExpenseDelivery(delivery: MunicipalExpenseDelive
     },
     syncedAt: new Date().toISOString(),
     gastos,
-    links,
+    links: [],
   };
 }
 

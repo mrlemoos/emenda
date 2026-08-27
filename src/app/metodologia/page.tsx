@@ -18,7 +18,7 @@ export default async function MethodologyPage() {
           e São Paulo capital dependem de entrega autorizada. Belo Horizonte e Recife também têm fontes
           públicas de execução orçamentária, que não são notas fiscais.
         </p>
-        <h2>Cobertura fiscal</h2>
+        <h2>Cobertura de gastos</h2>
         {coverage.length ? (
           [...byRecipient.entries()].map(([recipientKey, rows]) => (
             <section key={recipientKey}>

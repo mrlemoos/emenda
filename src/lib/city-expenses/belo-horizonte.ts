@@ -12,8 +12,8 @@ type CkanResource = {
   datastore_active?: boolean;
 };
 
-type CkanPackageResponse = { result: { resources: CkanResource[] } };
-type CkanRecordsResponse = { result: { records: CkanRow[] } };
+type CkanPackageResponse = { success?: boolean; result?: { resources?: unknown } };
+type CkanRecordsResponse = { success?: boolean; result?: { records?: unknown } };
 
 export async function fetchBeloHorizonteExpenses(year: number): Promise<MunicipalExpenseDelivery> {
   if (!Number.isInteger(year) || year < 2020 || year > new Date().getUTCFullYear()) {
@@ -21,7 +21,10 @@ export async function fetchBeloHorizonteExpenses(year: number): Promise<Municipa
   }
 
   const metadata = await fetchJson<CkanPackageResponse>(PACKAGE_URL);
-  const resource = metadata.result.resources.find((candidate) =>
+  if (!metadata.success || !Array.isArray(metadata.result?.resources)) {
+    throw new Error("Belo Horizonte retornou metadados CKAN inválidos");
+  }
+  const resource = metadata.result.resources.filter(isCkanResource).find((candidate) =>
     candidate.datastore_active && [candidate.name, candidate.description, candidate.url]
       .filter((value): value is string => Boolean(value))
       .some((value) => value.includes(String(year))),
@@ -32,9 +35,12 @@ export async function fetchBeloHorizonteExpenses(year: number): Promise<Municipa
   const rows: CkanRow[] = [];
   for (let offset = 0; ; offset += 1_000) {
     const page = await fetchJson<CkanRecordsResponse>(
-      `https://dados.pbh.gov.br/api/3/action/datastore_search?resource_id=${encodeURIComponent(resource.id)}&limit=1000&offset=${offset}`,
+      `https://dados.pbh.gov.br/api/3/action/datastore_search?resource_id=${encodeURIComponent(resource.id)}&limit=1000&offset=${offset}&sort=_id%20asc`,
     );
-    rows.push(...page.result.records);
+    if (!page.success || !Array.isArray(page.result?.records)) {
+      throw new Error("Belo Horizonte retornou dados CKAN inválidos");
+    }
+    rows.push(...page.result.records.filter(isCkanRow));
     if (page.result.records.length < 1_000) break;
   }
 
@@ -88,7 +94,6 @@ function normaliseRow(
     paymentId: text(field(row, "Número Ordem de Pagamento")),
     sourceUrl,
     sourceLabel: SOURCE_LABEL,
-    federalAmendmentCode: explicitFederalAmendmentCode(row),
   }];
 }
 
@@ -96,20 +101,16 @@ function nonZero(value: string | null) {
   return value && Number(value) !== 0 ? value : null;
 }
 
-function explicitFederalAmendmentCode(row: CkanRow): string | null {
-  for (const [key, value] of Object.entries(row)) {
-    const normalisedKey = key.normalize("NFD").replace(/\p{Diacritic}/gu, "").toLowerCase();
-    if (normalisedKey.includes("emenda federal")) return text(value);
-  }
-  return null;
-}
-
 function period(rows: CkanRow[], year: number): Pick<MunicipalExpenseDelivery, "periodStart" | "periodEnd"> {
-  const dates = rows
-    .map((row) => date(field(row, "Dt Movimento", "Data Pagamento", "Data Liquidação")))
-    .filter((value): value is string => Boolean(value))
-    .sort();
-  return dates.length ? { periodStart: dates[0], periodEnd: dates.at(-1)! } : { periodStart: `${year}-01-01`, periodEnd: `${year}-12-31` };
+  let first: string | null = null;
+  let last: string | null = null;
+  for (const row of rows) {
+    const value = date(field(row, "Dt Movimento", "Data Pagamento", "Data Liquidação"));
+    if (!value) continue;
+    if (!first || value < first) first = value;
+    if (!last || value > last) last = value;
+  }
+  return first && last ? { periodStart: first, periodEnd: last } : { periodStart: `${year}-01-01`, periodEnd: `${year}-12-31` };
 }
 
 function rowFingerprint(row: CkanRow): string {
@@ -123,4 +124,19 @@ async function fetchJson<T>(url: string): Promise<T> {
   const response = await fetch(url, { headers: { "user-agent": "Mozilla/5.0 (compatible; Emenda/0.1; transparencia@emenda.org)" } });
   if (!response.ok) throw new Error(`Belo Horizonte CKAN request failed: ${response.status}`);
   return response.json() as Promise<T>;
+}
+
+function isCkanResource(value: unknown): value is CkanResource {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+  const resource = value as Record<string, unknown>;
+  return (
+    typeof resource.id === "string" &&
+    typeof resource.url === "string" &&
+    (resource.name === undefined || typeof resource.name === "string") &&
+    (resource.description === undefined || typeof resource.description === "string")
+  );
+}
+
+function isCkanRow(value: unknown): value is CkanRow {
+  return Boolean(value && typeof value === "object" && !Array.isArray(value));
 }

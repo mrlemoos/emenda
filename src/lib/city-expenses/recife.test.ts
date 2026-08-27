@@ -9,15 +9,25 @@ describe("despesas públicas do Recife", () => {
         "CPF/CNPJ": "98.765.432/0001-10",
         "Data do Empenho": "01/04/2026",
         "Data de Pagamento": "10/04/2026",
+        "Mês": 4,
         Pagamento: "850,00",
         Liquidação: "900,00",
+        Órgão: "Saúde",
+      },
+      {
+        "Nome do Credor": "Fornecedor Recife SA",
+        "CPF/CNPJ": "98.765.432/0001-10",
+        "Mês": 4,
+        Pagamento: null,
+        Liquidação: "25,10",
         Órgão: "Saúde",
       },
       {
         "Nome do Credor": "Outro fornecedor",
         "CPF/CNPJ": "123.456.789-09",
         "Data do Empenho": "2026-05-01",
-        Pagamento: "",
+        "Mês": 5,
+        Pagamento: "0,00",
         Liquidação: "25.10",
       },
     ], 2026, "https://dados.recife.pe.gov.br/arquivo.csv");
@@ -28,11 +38,10 @@ describe("despesas públicas do Recife", () => {
       expect.objectContaining({
         supplierName: "Fornecedor Recife SA",
         supplierDocument: "98765432000110",
-        amount: "850.00",
-        spentAt: "2026-04-10",
-        federalAmendmentCode: null,
+        amount: "875.10",
+        spentAt: "2026-04-30",
       }),
-      expect.objectContaining({ supplierDocument: null, amount: "25.10", spentAt: "2026-05-01" }),
+      expect.objectContaining({ supplierDocument: null, amount: "25.10", spentAt: "2026-05-31" }),
     ]);
   });
 });
