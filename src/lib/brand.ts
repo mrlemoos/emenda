@@ -1,4 +1,6 @@
 export const githubRepoUrl = "https://github.com/mrlemoos/emenda";
+export const githubProfileUrl = "https://github.com/mrlemoos";
+export const buyMeACoffeeUrl = "https://buymeacoffee.com/leolemos";
 
 export const brand = {
   paper: "#f3efe4",

@@ -1,11 +1,18 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
-import { githubRepoUrl, logoSvg } from "./brand";
+import { buyMeACoffeeUrl, githubProfileUrl, githubRepoUrl, logoSvg } from "./brand";
 
 describe("githubRepoUrl", () => {
   it("points at the public mrlemoos/emenda repository", () => {
     expect(githubRepoUrl).toBe("https://github.com/mrlemoos/emenda");
+  });
+});
+
+describe("support links", () => {
+  it("point to Leonardo's public funding profiles", () => {
+    expect(githubProfileUrl).toBe("https://github.com/mrlemoos");
+    expect(buyMeACoffeeUrl).toBe("https://buymeacoffee.com/leolemos");
   });
 });
 
